@@ -1,0 +1,24 @@
+# Configuracion con credenciales (usar app/config.example.php como plantilla)
+app/config.php
+
+# Artefactos de despliegue y respaldos
+edufolio_infinityfree.zip
+public/img/logo-original.png
+
+# Logs y temporales
+*.log
+server.log
+
+# Generadores / cache de Python
+docs/__pycache__/
+__pycache__/
+*.pyc
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Configuracion de herramientas locales
+.claude/

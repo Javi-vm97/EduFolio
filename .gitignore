@@ -20,8 +20,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Configuracion de herramientas locales
-.claude/
-
 # Guia interna (no publicar)
 INSTALACION_LOCAL.md

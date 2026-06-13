@@ -1,11 +1,14 @@
 # EduFolio - Enruta todas las peticiones hacia la carpeta public/
-# (este archivo va en la raiz del sitio: htdocs/)
+# (este archivo va en la raiz del proyecto). Funciona tanto si el proyecto
+# esta en la raiz del dominio como dentro de una subcarpeta de htdocs.
 Options -Indexes
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # No reescribir lo que ya apunta a /public/
-    RewriteCond %{REQUEST_URI} !^/public/
+    # Si ya esta dentro de public/, servir directamente (evita el bucle de reescritura)
+    RewriteRule ^public/ - [L]
+
+    # Cualquier otra ruta se sirve desde public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

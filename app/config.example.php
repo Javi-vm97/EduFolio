@@ -5,6 +5,18 @@
 
 declare(strict_types=1);
 
+/* Compatibilidad con PHP 7.x (estas funciones existen desde PHP 8.0) */
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle) {
+        return $needle === '' || strpos($haystack, $needle) !== false;
+    }
+}
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return strpos($haystack, $needle) === 0;
+    }
+}
+
 // Datos de la aplicacion
 const APP_NAME = 'EduFolio';
 const APP_DESC = 'Portafolio Virtual Docente';
@@ -34,13 +46,17 @@ define('DB_CHARSET', 'utf8mb4');
 
 date_default_timezone_set('America/Mexico_City');
 
-// Sesiones seguras
+// Sesiones seguras (compatible con PHP 7.2 y posteriores)
 if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path'     => '/',
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
+    if (PHP_VERSION_ID >= 70300) {
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        session_set_cookie_params(0, '/', '', false, true);
+    }
     session_start();
 }

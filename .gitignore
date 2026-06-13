@@ -2,7 +2,7 @@
 app/config.php
 
 # Artefactos de despliegue y respaldos
-edufolio_infinityfree.zip
+*.zip
 public/img/logo-original.png
 
 # Logs y temporales
@@ -20,3 +20,8 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Configuracion de herramientas locales
+.claude/
+
+# Guia interna (no publicar)
+INSTALACION_LOCAL.md

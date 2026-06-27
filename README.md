@@ -67,10 +67,4 @@ CLASRROOM/
 - Escape de salida con `htmlspecialchars()` → previene XSS.
 - Cookies de sesión `HttpOnly` y `SameSite=Lax`.
 
-## Roadmap de fases
 
-| Fase | Entrega | Contenido |
-|------|---------|-----------|
-| **1** | 12 jun | App base, registro/login, estructura de secciones navegable |
-| **2** | 19 jun | CRUD completo de las 4 secciones + carga de archivos |
-| **3** | 26 jun | Refinamiento, roles, despliegue y resultados finales |

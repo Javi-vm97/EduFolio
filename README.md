@@ -4,9 +4,6 @@ Aplicación web tipo portafolio virtual para docentes (al estilo Classroom / Moo
 Permite a los profesores registrarse, iniciar sesión y organizar su trabajo en
 secciones: **Documentos, Notas, Material didáctico y Tareas**.
 
-> Proyecto de investigación dividido en 3 fases de entrega.
-> **Fase 1 (actual):** aplicación base + autenticación + estructura de secciones.
-
 **Demo en línea:** <https://edufolio.freedev.app>
 **Arquitectura del proyecto:** ver [ARQUITECTURA.md](ARQUITECTURA.md)
 
@@ -58,7 +55,7 @@ CLASRROOM/
 > Alternativa: copiar la carpeta a `C:\xampp\htdocs\` y servir con Apache,
 > apuntando el navegador a `http://localhost/CLASRROOM/public/`.
 
-## Seguridad implementada (Fase 1)
+## Seguridad implementada
 
 - Contraseñas cifradas con `password_hash()` (bcrypt).
 - Consultas con sentencias preparadas (PDO) → previene inyección SQL.

@@ -5,6 +5,10 @@ app/config.php
 *.zip
 public/img/logo-original.png
 
+# Archivos subidos por usuarios (se conserva la estructura de carpetas)
+storage/uploads/*
+!storage/uploads/.gitkeep
+
 # Logs y temporales
 *.log
 server.log

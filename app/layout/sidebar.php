@@ -8,7 +8,11 @@ $secciones = [
     'notas.php'      => ['Notas',              'bi-journal-text'],
     'material.php'   => ['Material didactico', 'bi-easel2-fill'],
     'tareas.php'     => ['Tareas',             'bi-check2-square'],
+    'perfil.php'     => ['Mi perfil',          'bi-person-gear'],
 ];
+if (es_admin()) {
+    $secciones['admin.php'] = ['Administracion', 'bi-shield-lock'];
+}
 ?>
 <aside class="sidebar" id="sidebar">
     <nav>
@@ -24,7 +28,6 @@ $secciones = [
         </ul>
     </nav>
     <div class="sidebar-pie">
-        <span class="fase-badge">Fase 1</span>
         <small><?= APP_DESC ?></small>
     </div>
 </aside>

@@ -104,3 +104,55 @@ function cerrar_sesion(): void
     }
     session_destroy();
 }
+
+/* Indica si el usuario en sesion es administrador. */
+function es_admin(): bool
+{
+    $u = usuario_actual();
+    return $u !== null && ($u['rol'] ?? '') === 'admin';
+}
+
+/* Obliga a ser administrador; si no, regresa al panel. */
+function requerir_admin(): void
+{
+    requerir_login();
+    if (!es_admin()) {
+        flash('error', 'Acceso restringido a administradores.');
+        redirigir('dashboard.php');
+    }
+}
+
+/* Actualiza los datos de perfil del usuario. Devuelve [exito, mensaje]. */
+function perfil_actualizar(int $usuario_id, string $nombre, string $apellidos, ?string $institucion): array
+{
+    $nombre    = trim($nombre);
+    $apellidos = trim($apellidos);
+    if ($nombre === '' || $apellidos === '') {
+        return [false, 'El nombre y los apellidos son obligatorios.'];
+    }
+    $institucion = ($institucion !== null && trim($institucion) !== '') ? trim($institucion) : null;
+    $stmt = db()->prepare('UPDATE usuarios SET nombre = ?, apellidos = ?, institucion = ? WHERE id = ?');
+    $stmt->execute([$nombre, $apellidos, $institucion, $usuario_id]);
+    return [true, 'Perfil actualizado correctamente.'];
+}
+
+/* Cambia la contrasena verificando la actual. Devuelve [exito, mensaje]. */
+function password_cambiar(int $usuario_id, string $actual, string $nueva, string $confirmar): array
+{
+    if (strlen($nueva) < 8) {
+        return [false, 'La nueva contrasena debe tener al menos 8 caracteres.'];
+    }
+    if ($nueva !== $confirmar) {
+        return [false, 'La confirmacion de la nueva contrasena no coincide.'];
+    }
+    $stmt = db()->prepare('SELECT password_hash FROM usuarios WHERE id = ?');
+    $stmt->execute([$usuario_id]);
+    $row = $stmt->fetch();
+    if (!$row || !password_verify($actual, $row['password_hash'])) {
+        return [false, 'La contrasena actual es incorrecta.'];
+    }
+    $hash = password_hash($nueva, PASSWORD_DEFAULT);
+    $up = db()->prepare('UPDATE usuarios SET password_hash = ? WHERE id = ?');
+    $up->execute([$hash, $usuario_id]);
+    return [true, 'Contrasena actualizada correctamente.'];
+}

@@ -12,7 +12,7 @@ $ocultar_pie = true;
 require __DIR__ . '/../app/layout/header.php';
 ?>
 
-<!-- ===================== NAVBAR ===================== -->
+<!-- NAVBAR -->
 <nav class="nav" id="nav">
     <div class="contenedor nav-inner">
         <a class="marca" href="index.php"><img class="marca-img" src="img/logo.png" alt="<?= APP_NAME ?>"></a>
@@ -31,7 +31,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </nav>
 
-<!-- ===================== HERO ===================== -->
+<!-- HERO -->
 <header class="hero" id="inicio">
     <div class="hero-bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
     <div class="contenedor hero-grid">
@@ -66,7 +66,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </header>
 
-<!-- ===================== STATS ===================== -->
+<!-- STATS -->
 <section class="seccion stats">
     <div class="contenedor stats-grid">
         <div class="stat reveal"><div class="num" data-count="4">0</div><div class="lbl">Secciones integradas</div></div>
@@ -76,7 +76,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== CARACTERISTICAS / ABOUT ===================== -->
+<!-- CARACTERISTICAS / ABOUT -->
 <section class="seccion" id="caracteristicas">
     <div class="contenedor features-grid">
         <div class="reveal">
@@ -104,7 +104,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== SECCIONES SHOWCASE ===================== -->
+<!-- SECCIONES SHOWCASE -->
 <section class="seccion" id="secciones" style="background:var(--gris-claro);">
     <div class="contenedor">
         <div class="centrado reveal">
@@ -130,7 +130,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== COMO FUNCIONA ===================== -->
+<!-- COMO FUNCIONA -->
 <section class="seccion" id="como">
     <div class="contenedor">
         <div class="centrado reveal">
@@ -148,7 +148,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== TESTIMONIOS ===================== -->
+<!-- TESTIMONIOS -->
 <section class="seccion" id="testimonios" style="background:var(--gris-claro);">
     <div class="contenedor">
         <div class="centrado reveal">
@@ -175,7 +175,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== CTA ===================== -->
+<!-- CTA -->
 <section class="seccion">
     <div class="contenedor">
         <div class="cta-band reveal">
@@ -186,7 +186,7 @@ require __DIR__ . '/../app/layout/header.php';
     </div>
 </section>
 
-<!-- ===================== FOOTER ===================== -->
+<!-- FOOTER -->
 <footer class="footer">
     <div class="contenedor footer-grid">
         <div>

@@ -1,0 +1,9 @@
+# EduFolio - Bloquea el acceso web directo a los archivos subidos.
+# Los archivos solo se sirven mediante public/descargar.php (validando el dueno).
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

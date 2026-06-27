@@ -1,15 +1,20 @@
 <?php
 /* EduFolio - Panel principal (dashboard) del docente. */
 require_once __DIR__ . '/../app/auth.php';
+require_once __DIR__ . '/../app/documentos.php';
+require_once __DIR__ . '/../app/notas.php';
+require_once __DIR__ . '/../app/materiales.php';
+require_once __DIR__ . '/../app/tareas.php';
 requerir_login();
 
-$u = usuario_actual();
+$u   = usuario_actual();
+$uid = (int)$u['id'];
 
 $tarjetas = [
-    ['documentos.php', 'Documentos',         'Sube y resguarda tus archivos institucionales.', 'bi-folder-fill',     'bg-indigo'],
-    ['notas.php',      'Notas',              'Apuntes y recordatorios rapidos.',                'bi-journal-text',    'bg-naranja'],
-    ['material.php',   'Material didactico', 'Recursos organizados por materia.',               'bi-easel2-fill',     'bg-cian'],
-    ['tareas.php',     'Tareas',             'Da seguimiento a actividades y entregas.',        'bi-check2-square',   'bg-morado'],
+    ['documentos.php', 'Documentos',         'Sube y resguarda tus archivos institucionales.', 'documentos.svg', documentos_contar($uid)],
+    ['notas.php',      'Notas',              'Apuntes y recordatorios rapidos.',                'notas.svg',      notas_contar($uid)],
+    ['material.php',   'Material didactico', 'Recursos organizados por materia.',               'material.svg',   materiales_contar($uid)],
+    ['tareas.php',     'Tareas',             'Da seguimiento a actividades y entregas.',        'tareas.svg',     tareas_contar($uid)],
 ];
 
 $titulo    = 'Inicio';
@@ -22,9 +27,12 @@ require __DIR__ . '/../app/layout/header.php';
 </div>
 
 <div class="grid-cards">
-    <?php foreach ($tarjetas as $i => [$ruta, $titulo_c, $desc, $icono, $color]): ?>
+    <?php foreach ($tarjetas as $i => [$ruta, $titulo_c, $desc, $icono, $total]): ?>
         <a class="card-seccion reveal d<?= $i ?>" href="<?= e($ruta) ?>">
-            <div class="ic <?= e($color) ?>"><i class="bi <?= e($icono) ?>"></i></div>
+            <div class="card-top">
+                <div class="ic-img"><img src="assets/icons/<?= e($icono) ?>" alt=""></div>
+                <span class="card-contador"><?= (int)$total ?></span>
+            </div>
             <h2><?= e($titulo_c) ?></h2>
             <p><?= e($desc) ?></p>
             <span class="card-link">Abrir <i class="bi bi-arrow-right"></i></span>

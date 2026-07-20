@@ -40,13 +40,16 @@ function requerir_login(): void
     }
 }
 
-/* Registra un nuevo docente. Devuelve [exito, mensaje]. */
-function registrar_usuario(string $nombre, string $apellidos, string $email, string $password, ?string $institucion): array
+/* Registra un nuevo usuario (docente o alumno). Devuelve [exito, mensaje]. */
+function registrar_usuario(string $nombre, string $apellidos, string $email, string $password, ?string $institucion, string $rol = 'docente'): array
 {
     $nombre    = trim($nombre);
     $apellidos = trim($apellidos);
     $email     = strtolower(trim($email));
     $institucion = $institucion !== null ? trim($institucion) : null;
+    if (!in_array($rol, ['docente', 'alumno'], true)) {
+        $rol = 'docente';   // el rol admin no se asigna desde el registro
+    }
 
     if ($nombre === '' || $apellidos === '' || $email === '' || $password === '') {
         return [false, 'Todos los campos obligatorios deben completarse.'];
@@ -66,10 +69,10 @@ function registrar_usuario(string $nombre, string $apellidos, string $email, str
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = db()->prepare(
-        'INSERT INTO usuarios (nombre, apellidos, email, password_hash, institucion)
-         VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO usuarios (nombre, apellidos, email, password_hash, institucion, rol)
+         VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$nombre, $apellidos, $email, $hash, $institucion ?: null]);
+    $stmt->execute([$nombre, $apellidos, $email, $hash, $institucion ?: null, $rol]);
 
     return [true, 'Cuenta creada correctamente. Ya puedes iniciar sesion.'];
 }
@@ -118,6 +121,49 @@ function requerir_admin(): void
     requerir_login();
     if (!es_admin()) {
         flash('error', 'Acceso restringido a administradores.');
+        redirigir('dashboard.php');
+    }
+}
+
+/* Indica si el usuario en sesion es docente. */
+function es_docente(): bool
+{
+    $u = usuario_actual();
+    return $u !== null && ($u['rol'] ?? '') === 'docente';
+}
+
+/* Obliga a ser docente; si no, regresa al panel. */
+function requerir_docente(): void
+{
+    requerir_login();
+    if (!es_docente()) {
+        flash('error', 'Este modulo esta disponible solo para docentes.');
+        redirigir('dashboard.php');
+    }
+}
+
+/* Indica si el usuario en sesion es alumno. */
+function es_alumno(): bool
+{
+    $u = usuario_actual();
+    return $u !== null && ($u['rol'] ?? '') === 'alumno';
+}
+
+/* Obliga a ser alumno; si no, regresa al panel. */
+function requerir_alumno(): void
+{
+    requerir_login();
+    if (!es_alumno()) {
+        flash('error', 'Esta seccion es para alumnos.');
+        redirigir('dashboard.php');
+    }
+}
+
+/* Bloquea a los alumnos de las secciones propias del docente. */
+function bloquear_alumno(): void
+{
+    if (es_alumno()) {
+        flash('error', 'Esta seccion es solo para docentes.');
         redirigir('dashboard.php');
     }
 }

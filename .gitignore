@@ -24,5 +24,11 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Configuracion de herramientas locales
+.claude/
+
+# Documentacion (contiene datos de acceso; se finaliza al cierre del proyecto)
+docs/
+
 # Guia interna (no publicar)
 INSTALACION_LOCAL.md

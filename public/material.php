@@ -2,10 +2,18 @@
 /* EduFolio - Seccion Material didactico (Fase 2). */
 require_once __DIR__ . '/../app/auth.php';
 require_once __DIR__ . '/../app/materiales.php';
+require_once __DIR__ . '/../app/asistencia.php';
 requerir_login();
+bloquear_alumno();
 
 $u   = usuario_actual();
 $uid = (int)$u['id'];
+
+function _grupo_valido($gid, int $uid)
+{
+    $gid = (int)$gid;
+    return ($gid && grupos_obtener($gid, $uid)) ? $gid : null;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificar_csrf();
@@ -15,13 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $titulo  = trim((string)($_POST['titulo'] ?? ''));
         $materia = trim((string)($_POST['materia'] ?? ''));
         $desc    = trim((string)($_POST['descripcion'] ?? ''));
-        [$ok, $msg] = materiales_crear($uid, $titulo, $materia, $desc, $_FILES['archivo'] ?? []);
+        $gid     = _grupo_valido($_POST['grupo_id'] ?? 0, $uid);
+        [$ok, $msg] = materiales_crear($uid, $titulo, $materia, $desc, $_FILES['archivo'] ?? [], $gid);
         flash($ok ? 'exito' : 'error', $msg);
     } elseif ($accion === 'actualizar') {
         $titulo  = trim((string)($_POST['titulo'] ?? ''));
         $materia = trim((string)($_POST['materia'] ?? ''));
         $desc    = trim((string)($_POST['descripcion'] ?? ''));
-        [$ok, $msg] = materiales_actualizar((int)($_POST['id'] ?? 0), $uid, $titulo, $materia, $desc);
+        $gid     = _grupo_valido($_POST['grupo_id'] ?? 0, $uid);
+        [$ok, $msg] = materiales_actualizar((int)($_POST['id'] ?? 0), $uid, $titulo, $materia, $desc, $gid);
         flash($ok ? 'exito' : 'error', $msg);
     } elseif ($accion === 'eliminar') {
         materiales_eliminar((int)($_POST['id'] ?? 0), $uid);
@@ -33,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $editar     = isset($_GET['editar']) ? materiales_obtener((int)$_GET['editar'], $uid) : null;
 $q          = trim((string)($_GET['q'] ?? ''));
 $materiales = materiales_listar($uid, $q);
+$grupos     = grupos_listar($uid);
 
 $titulo    = 'Material didactico';
 $vista_app = true;
@@ -65,6 +76,14 @@ require __DIR__ . '/../app/layout/header.php';
             <label>Descripcion (opcional)
                 <textarea name="descripcion" rows="2"><?= e($editar['descripcion'] ?? '') ?></textarea>
             </label>
+            <label>Compartir con un grupo (opcional)
+                <select name="grupo_id">
+                    <option value="0">— Solo para mi (no compartir) —</option>
+                    <?php foreach ($grupos as $g): ?>
+                        <option value="<?= (int)$g['id'] ?>" <?= (int)($editar['grupo_id'] ?? 0) === (int)$g['id'] ? 'selected' : '' ?>><?= e($g['nombre'] . ($g['materia'] ? ' - ' . $g['materia'] : '')) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
             <p class="ayuda">El archivo no cambia. Para reemplazarlo, elimina el material y subelo de nuevo.</p>
             <div class="form-acciones">
                 <button type="submit" class="btn btn-primario"><i class="bi bi-check2"></i> Guardar cambios</button>
@@ -91,6 +110,15 @@ require __DIR__ . '/../app/layout/header.php';
             <label>Descripcion (opcional)
                 <textarea name="descripcion" rows="2"></textarea>
             </label>
+            <label>Compartir con un grupo (opcional)
+                <select name="grupo_id">
+                    <option value="0">— Solo para mi (no compartir) —</option>
+                    <?php foreach ($grupos as $g): ?>
+                        <option value="<?= (int)$g['id'] ?>"><?= e($g['nombre'] . ($g['materia'] ? ' - ' . $g['materia'] : '')) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <?php if (!$grupos): ?><p class="ayuda">Crea grupos en "Lista de asistencia" para compartir con tus alumnos.</p><?php endif; ?>
             <label>Archivo
                 <input type="file" name="archivo" required>
             </label>
@@ -124,6 +152,7 @@ require __DIR__ . '/../app/layout/header.php';
                     <?php if ($m['descripcion']): ?><p class="item-texto"><?= e($m['descripcion']) ?></p><?php endif; ?>
                     <span class="item-meta">
                         <?php if ($m['materia']): ?><span class="badge badge-cian"><?= e($m['materia']) ?></span><?php endif; ?>
+                        <?php if (!empty($m['grupo_nombre'])): ?><span class="badge"><i class="bi bi-people-fill"></i> <?= e($m['grupo_nombre']) ?></span><?php endif; ?>
                         <i class="bi bi-clock"></i> <?= e(date('d/m/Y', strtotime($m['creado_en']))) ?>
                     </span>
                 </div>

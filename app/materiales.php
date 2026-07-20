@@ -9,21 +9,29 @@ require_once __DIR__ . '/archivos.php';
 /* Lista el material de un usuario (mas reciente primero), con busqueda opcional. */
 function materiales_listar(int $usuario_id, string $q = ''): array
 {
+    $base = "SELECT m.id, m.titulo, m.descripcion, m.archivo, m.materia, m.creado_en,
+                    m.grupo_id, g.nombre AS grupo_nombre
+               FROM materiales m LEFT JOIN grupos g ON g.id = m.grupo_id
+              WHERE m.usuario_id = ?";
     if ($q !== '') {
         $like = '%' . $q . '%';
-        $stmt = db()->prepare(
-            'SELECT id, titulo, descripcion, archivo, materia, creado_en
-               FROM materiales WHERE usuario_id = ? AND (titulo LIKE ? OR descripcion LIKE ? OR materia LIKE ?)
-              ORDER BY creado_en DESC'
-        );
+        $stmt = db()->prepare("$base AND (m.titulo LIKE ? OR m.descripcion LIKE ? OR m.materia LIKE ?) ORDER BY m.creado_en DESC");
         $stmt->execute([$usuario_id, $like, $like, $like]);
     } else {
-        $stmt = db()->prepare(
-            'SELECT id, titulo, descripcion, archivo, materia, creado_en
-               FROM materiales WHERE usuario_id = ? ORDER BY creado_en DESC'
-        );
+        $stmt = db()->prepare("$base ORDER BY m.creado_en DESC");
         $stmt->execute([$usuario_id]);
     }
+    return $stmt->fetchAll();
+}
+
+/* Material compartido con un grupo (vista del alumno). */
+function materiales_de_grupo(int $grupo_id): array
+{
+    $stmt = db()->prepare(
+        'SELECT id, titulo, descripcion, archivo, materia, creado_en
+           FROM materiales WHERE grupo_id = ? ORDER BY creado_en DESC'
+    );
+    $stmt->execute([$grupo_id]);
     return $stmt->fetchAll();
 }
 
@@ -36,7 +44,7 @@ function materiales_obtener(int $id, int $usuario_id): ?array
 }
 
 /* Crea un material subiendo su archivo. Devuelve [ok, mensaje]. */
-function materiales_crear(int $usuario_id, string $titulo, ?string $materia, ?string $descripcion, array $file): array
+function materiales_crear(int $usuario_id, string $titulo, ?string $materia, ?string $descripcion, array $file, ?int $grupo_id = null): array
 {
     if (trim($titulo) === '') {
         return [false, 'El titulo es obligatorio.'];
@@ -45,24 +53,26 @@ function materiales_crear(int $usuario_id, string $titulo, ?string $materia, ?st
     if (!$sub['ok']) {
         return [false, $sub['mensaje']];
     }
+    $grupo_id = $grupo_id ?: null;
     $stmt = db()->prepare(
-        'INSERT INTO materiales (usuario_id, titulo, descripcion, archivo, materia)
-         VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO materiales (usuario_id, grupo_id, titulo, descripcion, archivo, materia)
+         VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$usuario_id, trim($titulo), $descripcion ?: null, $sub['archivo'], $materia ?: null]);
+    $stmt->execute([$usuario_id, $grupo_id, trim($titulo), $descripcion ?: null, $sub['archivo'], $materia ?: null]);
     return [true, 'Material subido correctamente.'];
 }
 
 /* Actualiza los datos (titulo/materia/descripcion) de un material propio. */
-function materiales_actualizar(int $id, int $usuario_id, string $titulo, ?string $materia, ?string $descripcion): array
+function materiales_actualizar(int $id, int $usuario_id, string $titulo, ?string $materia, ?string $descripcion, ?int $grupo_id = null): array
 {
     if (trim($titulo) === '') {
         return [false, 'El titulo es obligatorio.'];
     }
+    $grupo_id = $grupo_id ?: null;
     $stmt = db()->prepare(
-        'UPDATE materiales SET titulo = ?, materia = ?, descripcion = ? WHERE id = ? AND usuario_id = ?'
+        'UPDATE materiales SET titulo = ?, materia = ?, descripcion = ?, grupo_id = ? WHERE id = ? AND usuario_id = ?'
     );
-    $stmt->execute([trim($titulo), $materia ?: null, $descripcion ?: null, $id, $usuario_id]);
+    $stmt->execute([trim($titulo), $materia ?: null, $descripcion ?: null, $grupo_id, $id, $usuario_id]);
     return [true, 'Material actualizado.'];
 }
 

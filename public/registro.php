@@ -6,7 +6,7 @@ if (esta_autenticado()) {
     redirigir('dashboard.php');
 }
 
-$datos = ['nombre' => '', 'apellidos' => '', 'email' => '', 'institucion' => ''];
+$datos = ['nombre' => '', 'apellidos' => '', 'email' => '', 'institucion' => '', 'rol' => 'docente'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificar_csrf();
@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $datos['apellidos']   = (string)($_POST['apellidos'] ?? '');
     $datos['email']       = (string)($_POST['email'] ?? '');
     $datos['institucion'] = (string)($_POST['institucion'] ?? '');
+    $datos['rol']         = ($_POST['rol'] ?? 'docente') === 'alumno' ? 'alumno' : 'docente';
     $password             = (string)($_POST['password'] ?? '');
     $password2            = (string)($_POST['password2'] ?? '');
 
@@ -25,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $datos['apellidos'],
             $datos['email'],
             $password,
-            $datos['institucion']
+            $datos['institucion'],
+            $datos['rol']
         );
         if ($ok) {
             flash('exito', $msg);
@@ -43,12 +45,12 @@ require __DIR__ . '/../app/layout/header.php';
     <aside class="auth-aside">
         <span class="blob b1"></span><span class="blob b2"></span>
         <a class="marca" href="index.php"><img class="marca-img" src="img/logo.png" alt="<?= APP_NAME ?>"></a>
-        <h2>Crea tu portafolio docente</h2>
-        <p>Un solo espacio para reunir, organizar y resguardar todo tu trabajo. Es gratis y toma menos de un minuto.</p>
+        <h2>Crea tu cuenta en EduFolio</h2>
+        <p>Un solo espacio para tu trabajo docente o para seguir tus clases como alumno. Es gratis y toma menos de un minuto.</p>
         <ul class="lista">
-            <li><i class="bi bi-check-circle-fill"></i> Sin costo ni anuncios</li>
+            <li><i class="bi bi-mortarboard-fill"></i> Docentes: organiza tu portafolio y grupos</li>
+            <li><i class="bi bi-backpack-fill"></i> Alumnos: recibe tareas y material</li>
             <li><i class="bi bi-shield-lock-fill"></i> Tus datos cifrados y protegidos</li>
-            <li><i class="bi bi-phone-fill"></i> Accesible desde cualquier dispositivo</li>
         </ul>
     </aside>
 
@@ -56,10 +58,20 @@ require __DIR__ . '/../app/layout/header.php';
         <div class="auth-card ancha reveal">
             <a class="auth-volver" href="index.php"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
             <h1>Crear cuenta</h1>
-            <p class="auth-sub">Registrate como docente para comenzar.</p>
+            <p class="auth-sub">Elige tu tipo de cuenta y completa tus datos.</p>
 
             <form method="post" action="registro.php" class="formulario" novalidate>
                 <?= csrf_field() ?>
+                <div class="rol-selector">
+                    <label class="rol-op">
+                        <input type="radio" name="rol" value="docente" <?= $datos['rol'] !== 'alumno' ? 'checked' : '' ?>>
+                        <span><i class="bi bi-mortarboard-fill"></i> Soy docente<small>Portafolio, grupos y asistencia</small></span>
+                    </label>
+                    <label class="rol-op">
+                        <input type="radio" name="rol" value="alumno" <?= $datos['rol'] === 'alumno' ? 'checked' : '' ?>>
+                        <span><i class="bi bi-backpack-fill"></i> Soy alumno<small>Recibe tareas y material</small></span>
+                    </label>
+                </div>
                 <div class="grid-2">
                     <label>Nombre(s)
                         <span class="campo"><i class="bi bi-person"></i>

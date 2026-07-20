@@ -17,22 +17,32 @@ function tarea_estado_texto(string $estado): string
 /* Lista las tareas de un usuario (pendientes primero, luego por fecha), con busqueda opcional. */
 function tareas_listar(int $usuario_id, string $q = ''): array
 {
-    $orden = "ORDER BY FIELD(estado,'pendiente','en_progreso','completada'),
-                       (fecha_entrega IS NULL), fecha_entrega ASC, creado_en DESC";
+    $orden = "ORDER BY FIELD(t.estado,'pendiente','en_progreso','completada'),
+                       (t.fecha_entrega IS NULL), t.fecha_entrega ASC, t.creado_en DESC";
+    $base = "SELECT t.id, t.titulo, t.descripcion, t.fecha_entrega, t.estado, t.creado_en,
+                    t.grupo_id, g.nombre AS grupo_nombre
+               FROM tareas t LEFT JOIN grupos g ON g.id = t.grupo_id
+              WHERE t.usuario_id = ?";
     if ($q !== '') {
         $like = '%' . $q . '%';
-        $stmt = db()->prepare(
-            "SELECT id, titulo, descripcion, fecha_entrega, estado, creado_en
-               FROM tareas WHERE usuario_id = ? AND (titulo LIKE ? OR descripcion LIKE ?) $orden"
-        );
+        $stmt = db()->prepare("$base AND (t.titulo LIKE ? OR t.descripcion LIKE ?) $orden");
         $stmt->execute([$usuario_id, $like, $like]);
     } else {
-        $stmt = db()->prepare(
-            "SELECT id, titulo, descripcion, fecha_entrega, estado, creado_en
-               FROM tareas WHERE usuario_id = ? $orden"
-        );
+        $stmt = db()->prepare("$base $orden");
         $stmt->execute([$usuario_id]);
     }
+    return $stmt->fetchAll();
+}
+
+/* Tareas asignadas a un grupo (vista del alumno). */
+function tareas_de_grupo(int $grupo_id): array
+{
+    $stmt = db()->prepare(
+        "SELECT id, titulo, descripcion, fecha_entrega, estado, creado_en
+           FROM tareas WHERE grupo_id = ?
+          ORDER BY (fecha_entrega IS NULL), fecha_entrega ASC, creado_en DESC"
+    );
+    $stmt->execute([$grupo_id]);
     return $stmt->fetchAll();
 }
 
@@ -45,7 +55,7 @@ function tareas_obtener(int $id, int $usuario_id): ?array
 }
 
 /* Crea una tarea. Devuelve [ok, mensaje]. */
-function tareas_crear(int $usuario_id, string $titulo, ?string $descripcion, ?string $fecha, string $estado): array
+function tareas_crear(int $usuario_id, string $titulo, ?string $descripcion, ?string $fecha, string $estado, ?int $grupo_id = null): array
 {
     if (trim($titulo) === '') {
         return [false, 'El titulo es obligatorio.'];
@@ -54,17 +64,18 @@ function tareas_crear(int $usuario_id, string $titulo, ?string $descripcion, ?st
         $estado = 'pendiente';
     }
     $fecha = ($fecha !== null && trim($fecha) !== '') ? $fecha : null;
+    $grupo_id = $grupo_id ?: null;
 
     $stmt = db()->prepare(
-        'INSERT INTO tareas (usuario_id, titulo, descripcion, fecha_entrega, estado)
-         VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO tareas (usuario_id, grupo_id, titulo, descripcion, fecha_entrega, estado)
+         VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$usuario_id, trim($titulo), $descripcion ?: null, $fecha, $estado]);
+    $stmt->execute([$usuario_id, $grupo_id, trim($titulo), $descripcion ?: null, $fecha, $estado]);
     return [true, 'Tarea creada.'];
 }
 
 /* Actualiza todos los datos de una tarea propia. Devuelve [ok, mensaje]. */
-function tareas_actualizar(int $id, int $usuario_id, string $titulo, ?string $descripcion, ?string $fecha, string $estado): array
+function tareas_actualizar(int $id, int $usuario_id, string $titulo, ?string $descripcion, ?string $fecha, string $estado, ?int $grupo_id = null): array
 {
     if (trim($titulo) === '') {
         return [false, 'El titulo es obligatorio.'];
@@ -73,10 +84,11 @@ function tareas_actualizar(int $id, int $usuario_id, string $titulo, ?string $de
         $estado = 'pendiente';
     }
     $fecha = ($fecha !== null && trim($fecha) !== '') ? $fecha : null;
+    $grupo_id = $grupo_id ?: null;
     $stmt = db()->prepare(
-        'UPDATE tareas SET titulo = ?, descripcion = ?, fecha_entrega = ?, estado = ? WHERE id = ? AND usuario_id = ?'
+        'UPDATE tareas SET titulo = ?, descripcion = ?, fecha_entrega = ?, estado = ?, grupo_id = ? WHERE id = ? AND usuario_id = ?'
     );
-    $stmt->execute([trim($titulo), $descripcion ?: null, $fecha, $estado, $id, $usuario_id]);
+    $stmt->execute([trim($titulo), $descripcion ?: null, $fecha, $estado, $grupo_id, $id, $usuario_id]);
     return [true, 'Tarea actualizada.'];
 }
 

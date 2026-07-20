@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../app/auth.php';
 require_once __DIR__ . '/../app/notas.php';
 requerir_login();
+bloquear_alumno();
 
 $u   = usuario_actual();
 $uid = (int)$u['id'];

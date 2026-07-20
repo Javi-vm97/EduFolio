@@ -2,10 +2,19 @@
 /* EduFolio - Seccion Tareas (Fase 2). */
 require_once __DIR__ . '/../app/auth.php';
 require_once __DIR__ . '/../app/tareas.php';
+require_once __DIR__ . '/../app/asistencia.php';
 requerir_login();
+bloquear_alumno();
 
 $u   = usuario_actual();
 $uid = (int)$u['id'];
+
+/* Devuelve el grupo_id si pertenece al docente; si no, null. */
+function _grupo_valido($gid, int $uid)
+{
+    $gid = (int)$gid;
+    return ($gid && grupos_obtener($gid, $uid)) ? $gid : null;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificar_csrf();
@@ -17,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             trim((string)($_POST['titulo'] ?? '')),
             trim((string)($_POST['descripcion'] ?? '')),
             (string)($_POST['fecha_entrega'] ?? ''),
-            (string)($_POST['estado'] ?? 'pendiente')
+            (string)($_POST['estado'] ?? 'pendiente'),
+            _grupo_valido($_POST['grupo_id'] ?? 0, $uid)
         );
         flash($ok ? 'exito' : 'error', $msg);
     } elseif ($accion === 'actualizar') {
@@ -26,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             trim((string)($_POST['titulo'] ?? '')),
             trim((string)($_POST['descripcion'] ?? '')),
             (string)($_POST['fecha_entrega'] ?? ''),
-            (string)($_POST['estado'] ?? 'pendiente')
+            (string)($_POST['estado'] ?? 'pendiente'),
+            _grupo_valido($_POST['grupo_id'] ?? 0, $uid)
         );
         flash($ok ? 'exito' : 'error', $msg);
     } elseif ($accion === 'estado') {
@@ -42,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $editar = isset($_GET['editar']) ? tareas_obtener((int)$_GET['editar'], $uid) : null;
 $q      = trim((string)($_GET['q'] ?? ''));
 $tareas = tareas_listar($uid, $q);
+$grupos = grupos_listar($uid);
 $hoy    = date('Y-m-d');
 
 $titulo    = 'Tareas';
@@ -81,6 +93,17 @@ require __DIR__ . '/../app/layout/header.php';
                 </select>
             </label>
         </div>
+        <label>Compartir con un grupo (opcional)
+            <select name="grupo_id">
+                <option value="0">— Solo para mi (no compartir) —</option>
+                <?php foreach ($grupos as $g): ?>
+                    <option value="<?= (int)$g['id'] ?>" <?= (int)($editar['grupo_id'] ?? 0) === (int)$g['id'] ? 'selected' : '' ?>>
+                        <?= e($g['nombre'] . ($g['materia'] ? ' - ' . $g['materia'] : '')) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <?php if (!$grupos): ?><p class="ayuda">Crea grupos en "Lista de asistencia" para poder compartir con tus alumnos.</p><?php endif; ?>
         <div class="form-acciones">
             <button type="submit" class="btn btn-primario"><i class="bi bi-<?= $editar ? 'check2' : 'plus-lg' ?>"></i> <?= $editar ? 'Guardar cambios' : 'Agregar tarea' ?></button>
             <?php if ($editar): ?><a class="btn btn-outline" href="tareas.php">Cancelar</a><?php endif; ?>
@@ -110,6 +133,9 @@ require __DIR__ . '/../app/layout/header.php';
                     <?php if ($t['descripcion']): ?><p class="item-texto"><?= e($t['descripcion']) ?></p><?php endif; ?>
                     <span class="item-meta">
                         <span class="badge badge-<?= e($t['estado']) ?>"><?= e(tarea_estado_texto($t['estado'])) ?></span>
+                        <?php if (!empty($t['grupo_nombre'])): ?>
+                            <span class="badge"><i class="bi bi-people-fill"></i> <?= e($t['grupo_nombre']) ?></span>
+                        <?php endif; ?>
                         <?php if ($t['fecha_entrega']): ?>
                             <span class="<?= $vencida ? 'vencida' : '' ?>"><i class="bi bi-calendar-event"></i>
                                 <?= e(date('d/m/Y', strtotime($t['fecha_entrega']))) ?><?= $vencida ? ' (vencida)' : '' ?></span>

@@ -1,11 +1,13 @@
 <?php
 /* EduFolio - Cabecera HTML comun. Variables: $titulo (string), $vista_app (bool), $cuerpo_clase (string opcional). */
 require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../notificaciones.php';
 
 $titulo       = $titulo ?? APP_NAME;
 $vista_app    = $vista_app ?? false;
 $cuerpo_clase = $cuerpo_clase ?? ($vista_app ? 'con-panel' : 'publica');
 $u            = usuario_actual();
+$noLeidas     = ($vista_app && $u) ? notif_no_leidas((int)$u['id']) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -39,6 +41,10 @@ $u            = usuario_actual();
         <img class="marca-img" src="img/logo.png" alt="<?= APP_NAME ?>">
     </a>
     <div class="topbar-derecha">
+        <a class="campana" href="notificaciones.php" title="Notificaciones">
+            <i class="bi bi-bell"></i>
+            <?php if ($noLeidas > 0): ?><span class="campana-num"><?= $noLeidas > 9 ? '9+' : $noLeidas ?></span><?php endif; ?>
+        </a>
         <span class="usuario-chip">
             <span class="av"></span>
             <?= e($u['nombre'] . ' ' . $u['apellidos']) ?>

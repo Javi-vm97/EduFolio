@@ -439,6 +439,39 @@ body.con-panel { background: var(--gris-claro); }
 .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
 .card-contador { background: var(--gris-claro); color: var(--tinta-2); font-weight: 800; min-width: 30px; height: 30px; padding: 0 .55rem; border-radius: 999px; display: inline-grid; place-items: center; font-size: .9rem; }
 
+/* Modulo Lista de asistencia */
+.grupo-barra { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio); padding: 1rem 1.3rem; box-shadow: var(--sombra); margin-bottom: 1.2rem; }
+.lista-alumnos { list-style: none; margin-top: 1rem; display: flex; flex-direction: column; gap: .5rem; }
+.lista-alumnos li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .55rem .9rem; border: 1px solid var(--linea); border-radius: 10px; }
+.lista-alumnos li span { display: flex; align-items: center; gap: .5rem; }
+.lista-alumnos form { margin: 0; }
+.tabla-asistencia th, .tabla-asistencia td { text-align: center; }
+.tabla-asistencia th:first-child, .tabla-asistencia td:first-child { text-align: left; }
+.col-radio { width: 90px; }
+.rad { position: relative; display: inline-flex; cursor: pointer; }
+.rad input { position: absolute; opacity: 0; width: 0; height: 0; }
+.rad span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--linea); display: inline-block; transition: background .15s, border-color .15s, box-shadow .15s; }
+.rad:hover span { border-color: var(--gris); }
+.rad-asistencia input:checked + span { background: var(--verde); border-color: transparent; box-shadow: 0 0 0 3px rgba(22,163,74,.25); }
+.rad-falta input:checked + span { background: var(--rosa); border-color: transparent; box-shadow: 0 0 0 3px rgba(251,63,82,.25); }
+.rad-retardo input:checked + span { background: var(--naranja); border-color: transparent; box-shadow: 0 0 0 3px rgba(250,125,60,.25); }
+
+/* Modulo Alumnos: selector de rol, campana y notificaciones */
+.rol-selector { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-bottom: .4rem; }
+.rol-op { position: relative; cursor: pointer; }
+.rol-op input { position: absolute; opacity: 0; }
+.rol-op span { display: flex; flex-direction: column; gap: .2rem; border: 2px solid var(--linea); border-radius: var(--radio-sm); padding: .9rem 1rem; font-weight: 700; transition: border-color .15s, background .15s; }
+.rol-op span i { font-size: 1.4rem; color: var(--indigo); }
+.rol-op span small { font-weight: 500; color: var(--gris); font-size: .8rem; }
+.rol-op input:checked + span { border-color: var(--indigo); background: var(--indigo-l); }
+
+.campana { position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--tinta-2); font-size: 1.25rem; transition: background .15s; }
+.campana:hover { background: var(--gris-claro); text-decoration: none; }
+.campana-num { position: absolute; top: 2px; right: 2px; background: var(--rosa); color: #fff; font-size: .65rem; font-weight: 800; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 999px; display: grid; place-items: center; }
+.notif-nueva { border-left: 4px solid var(--indigo); }
+
+@media (max-width: 520px) { .rol-selector { grid-template-columns: 1fr; } }
+
 /* Iconos ilustrados (a color) de las secciones */
 .ic-img { width: 54px; height: 54px; display: grid; place-items: center; flex-shrink: 0; }
 .ic-img img { width: 100%; height: 100%; display: block; }
